@@ -5,23 +5,11 @@ using namespace std;
 int main() {
     TodoList todo;
     const string filename = "todo.txt";
-    int choice;
-
     todo.loadTasks(filename);
 
+    int choice;
     while (true) {
-        cout << "\nMENU: \n"
-             << "1. Add New Task\n"
-             << "2. View All Tasks\n"
-             << "3. View Completed Tasks\n"
-             << "4. Mark Task as Complete\n"
-             << "5. Find Task\n"
-             << "6. Edit Task\n"
-             << "7. Delete Task\n"
-             << "8. Clear All Tasks\n"
-             << "9. Save Task Transactions\n"
-             << "10. Load Task Transactions\n"
-             << "11. Exit\nChoose: ";
+        displayMenu();
         cin >> choice;
         cin.ignore();
 

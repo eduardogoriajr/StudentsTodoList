@@ -1,23 +1,23 @@
 #ifndef TODO_H
 #define TODO_H
 
+#include <queue>
 #include <string>
+#include <fstream>
+#include <iostream>
+
 using namespace std;
 
 struct Task {
     string title;
-    string description;
     bool completed;
 };
 
 class TodoList {
 private:
-    Task tasks[100];  // fixed-size array for simplicity
-    int taskCount;
+    queue<Task> taskQueue;
 
 public:
-    TodoList();
-
     void addTask();
     void viewAllTasks() const;
     void viewCompletedTasks() const;
@@ -29,5 +29,7 @@ public:
     void saveTasks(const string& filename) const;
     void loadTasks(const string& filename);
 };
+
+void displayMenu();
 
 #endif

@@ -1,154 +1,221 @@
 #include "Todo.h"
 #include <iostream>
 #include <fstream>
+#include <queue>
+#include <string>
+
 using namespace std;
 
-TodoList::TodoList() {
-    taskCount = 0;
+void displayMenu() {
+    cout << "\nMENU:\n"
+         << "1. Add New Task\n"
+         << "2. View All Tasks\n"
+         << "3. View Completed Tasks\n"
+         << "4. Mark Task as Complete\n"
+         << "5. Find Task\n"
+         << "6. Edit Task\n"
+         << "7. Delete Task\n"
+         << "8. Clear All Tasks\n"
+         << "9. Save Task Transactions\n"
+         << "10. Load Task Transactions\n"
+         << "11. Exit\n"
+         << "Choose: ";
 }
 
+// Method: Add a new task to the queue
 void TodoList::addTask() {
-    if (taskCount >= 100) {
-        cout << "Task list full.\n";
-        return;
-    }
-
+    Task newTask;
     cout << "Enter task title: ";
-    getline(cin, tasks[taskCount].title);
-    cout << "Enter task description: ";
-    getline(cin, tasks[taskCount].description);
-    tasks[taskCount].completed = false;
-    taskCount++;
-
-    cout << "Task added.\n";
+    getline(cin, newTask.title);
+    newTask.completed = false;
+    taskQueue.push(newTask);
+    cout << "Task added!\n";
 }
 
+// Method: View all tasks
 void TodoList::viewAllTasks() const {
-    if (taskCount == 0) {
+    queue<Task> tempQueue = taskQueue;
+    if (tempQueue.empty()) {
         cout << "No tasks available.\n";
         return;
     }
 
-    for (int i = 0; i < taskCount; ++i) {
-        cout << i + 1 << ". " << tasks[i].title << " - " << tasks[i].description;
-        if (tasks[i].completed) cout << " (Completed)";
-        cout << "\n";
+    int i = 1;
+    while (!tempQueue.empty()) {
+        Task t = tempQueue.front();
+        cout << i++ << ". " << t.title << " [" << (t.completed ? "Completed" : "Pending") << "]\n";
+        tempQueue.pop();
     }
 }
 
+// Method: View completed tasks
 void TodoList::viewCompletedTasks() const {
-    int count = 0;
-    for (int i = 0; i < taskCount; ++i) {
-        if (tasks[i].completed) {
-            cout << "- " << tasks[i].title << " - " << tasks[i].description << " (Completed)\n";
-            count++;
+    queue<Task> tempQueue = taskQueue;
+    bool found = false;
+    int i = 1;
+
+    while (!tempQueue.empty()) {
+        Task t = tempQueue.front();
+        if (t.completed) {
+            cout << i++ << ". " << t.title << " [Completed]\n";
+            found = true;
         }
+        tempQueue.pop();
     }
 
-    if (count == 0) cout << "No completed tasks.\n";
+    if (!found) {
+        cout << "No completed tasks found.\n";
+    }
 }
 
+// Method: Mark a specific task as completed
 void TodoList::markTaskComplete() {
-    int idx;
-    cout << "Enter task number to mark complete: ";
-    cin >> idx;
-    cin.ignore();
+    string title;
+    cout << "Enter the title of the task to mark as complete: ";
+    getline(cin, title);
 
-    if (idx >= 1 && idx <= taskCount) {
-        tasks[idx - 1].completed = true;
-        cout << "Task marked as complete.\n";
+    queue<Task> tempQueue;
+    bool marked = false;
+
+    while (!taskQueue.empty()) {
+        Task t = taskQueue.front();
+        taskQueue.pop();
+
+        if (!marked && t.title == title) {
+            t.completed = true;
+            marked = true;
+        }
+
+        tempQueue.push(t);
+    }
+
+    taskQueue = tempQueue;
+
+    if (marked) {
+        cout << "Task marked as completed.\n";
     } else {
         cout << "Task not found.\n";
     }
 }
 
+// Method: Find a task by keyword
 void TodoList::findTask() const {
     string keyword;
-    cout << "Enter keyword to search for: ";
+    cout << "Enter keyword to search: ";
     getline(cin, keyword);
 
-    int found = 0;
-    for (int i = 0; i < taskCount; ++i) {
-        if (tasks[i].title == keyword || tasks[i].description == keyword) {
-            cout << "- " << tasks[i].title << " - " << tasks[i].description;
-            if (tasks[i].completed) cout << " (Completed)";
-            cout << "\n";
-            found++;
+    queue<Task> tempQueue = taskQueue;
+    bool found = false;
+    int i = 1;
+
+    while (!tempQueue.empty()) {
+        Task t = tempQueue.front();
+        if (t.title.find(keyword) != string::npos) {
+            cout << i++ << ". " << t.title << " [" << (t.completed ? "Completed" : "Pending") << "]\n";
+            found = true;
         }
+        tempQueue.pop();
     }
 
-    if (found == 0) cout << "No matching task found.\n";
+    if (!found) {
+        cout << "No matching tasks found.\n";
+    }
 }
 
+// Method: Edit the title of a specific task
 void TodoList::editTask() {
-    int idx;
-    cout << "Enter task number to edit: ";
-    cin >> idx;
-    cin.ignore();
+    string oldTitle;
+    cout << "Enter the title of the task to edit: ";
+    getline(cin, oldTitle);
 
-    if (idx >= 1 && idx <= taskCount) {
-        cout << "New title: ";
-        getline(cin, tasks[idx - 1].title);
-        cout << "New description: ";
-        getline(cin, tasks[idx - 1].description);
+    queue<Task> tempQueue;
+    bool edited = false;
+
+    while (!taskQueue.empty()) {
+        Task t = taskQueue.front();
+        taskQueue.pop();
+
+        if (!edited && t.title == oldTitle) {
+            cout << "Enter new title: ";
+            getline(cin, t.title);
+            edited = true;
+        }
+
+        tempQueue.push(t);
+    }
+
+    taskQueue = tempQueue;
+
+    if (edited) {
         cout << "Task updated.\n";
     } else {
         cout << "Task not found.\n";
     }
 }
 
+// Method: Delete a specific task
 void TodoList::deleteTask() {
-    int idx;
-    cout << "Enter task number to delete: ";
-    cin >> idx;
-    cin.ignore();
+    string title;
+    cout << "Enter the title of the task to delete: ";
+    getline(cin, title);
 
-    if (idx >= 1 && idx <= taskCount) {
-        for (int i = idx - 1; i < taskCount - 1; ++i) {
-            tasks[i] = tasks[i + 1];  // shift left
+    queue<Task> tempQueue;
+    bool deleted = false;
+
+    while (!taskQueue.empty()) {
+        Task t = taskQueue.front();
+        taskQueue.pop();
+
+        if (!deleted && t.title == title) {
+            deleted = true;
+            continue;
         }
-        taskCount--;
+
+        tempQueue.push(t);
+    }
+
+    taskQueue = tempQueue;
+
+    if (deleted) {
         cout << "Task deleted.\n";
     } else {
         cout << "Task not found.\n";
     }
 }
 
+// Method: Clear all tasks
 void TodoList::clearTasks() {
-    taskCount = 0;
+    while (!taskQueue.empty()) {
+        taskQueue.pop();
+    }
     cout << "All tasks cleared.\n";
 }
 
-void TodoList::saveTasks(const string& filename) const {
-    ofstream out(filename.c_str());
-    for (int i = 0; i < taskCount; ++i) {
-        out << tasks[i].title << "|" << tasks[i].description << "|" << tasks[i].completed << "\n";
-    }
-    out.close();
-    cout << "Tasks saved to file.\n";
-}
-
+// Load tasks from file
 void TodoList::loadTasks(const string& filename) {
-    ifstream in(filename.c_str());
-    if (!in.is_open()) {
-        cout << "File not found.\n";
-        return;
+    ifstream infile(filename.c_str());
+    if (infile.is_open()) {
+        string line;
+        while (getline(infile, line)) {
+            Task t;
+            t.title = line;
+            t.completed = false; // default for simplicity
+            taskQueue.push(t);
+        }
+        infile.close();
     }
-
-    clearTasks();
-    string line;
-    while (getline(in, line)) {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        if (p1 == string::npos || p2 == string::npos) continue;
-
-        tasks[taskCount].title = line.substr(0, p1);
-        tasks[taskCount].description = line.substr(p1 + 1, p2 - p1 - 1);
-        string completedStr = line.substr(p2 + 1);
-        tasks[taskCount].completed = (completedStr == "1" || completedStr == "true");
-
-        taskCount++;
-    }
-    in.close();
-    cout << "Tasks loaded from file.\n";
 }
+
+// Save tasks to file
+void TodoList::saveTasks(const string& filename) const {
+    ofstream outfile(filename.c_str());
+    if (outfile.is_open()) {
+        queue<Task> tempQueue = taskQueue;
+        while (!tempQueue.empty()) {
+            outfile << tempQueue.front().title << endl;
+            tempQueue.pop();
+        }
+        outfile.close();
+    }
+}
+
