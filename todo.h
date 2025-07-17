@@ -1,20 +1,40 @@
-#ifndef TODO_H
-#define TODO_H
+#ifndef TODOLIST_H
+#define TODOLIST_H
 
-#include <queue>
 #include <string>
+#include <queue>
 using namespace std;
 
-void loadQueueFromFile(queue<string>&, const string&);
-void saveQueueToFile(const queue<string>&, const string&);
-void addTask(queue<string>&);
-void markTaskComplete(queue<string>&);
-void viewAllTask();
-void viewCompletedTask();
-void editTask();
-void deleteTask();
-void clearAllTask();
-void display(const queue<string>&);
-void displayMenu();
+struct TaskNode {
+    string title;
+    bool completed;
+    TaskNode* next;
+};
+
+class ToDoList {
+private:
+    TaskNode* head;
+    queue<string> taskQueue;
+
+public:
+    ToDoList();
+    ~ToDoList();
+
+    void addToQueue();
+    void processQueue();
+
+    void viewAllTasks() const;
+    void viewCompletedTasks() const;
+    void markTaskComplete();
+    void findTask();
+    void deleteTask();
+    void clearAllTasks();
+
+    void loadFromFile(const string& filename);
+    void saveToFile(const string& filename) const;
+
+    void displayQueuedTasks() const;
+    void displayMenu() const;
+};
 
 #endif
