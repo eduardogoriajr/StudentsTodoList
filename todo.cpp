@@ -101,9 +101,15 @@ void ToDoList::viewCompletedTasks() const {
 void ToDoList::markTaskComplete() {
     viewAllTasks();
     int pos;
-    cout << "\nEnter task number to mark complete: ";
+    cout << "\nEnter task number to mark complete (or 0 to cancel): ";
     cin >> pos;
     cin.ignore();
+
+    if (pos == 0) {
+        cout << "Cancelled. Returning to menu." << endl;
+        return;
+    }
+
     TaskNode* curr = head;
     for (int i = 1; curr && i < pos; ++i) curr = curr->next;
     if (curr) {
@@ -250,7 +256,7 @@ void ToDoList::displayMenu() const {
     cout << "|    Student Task and Deadline Organizers   |" << endl;
     cout << "+-------------------------------------------+" << endl;
     cout << "|  1. Add Task                              |" << endl;
-    cout << "|  2. Undo Last Queued Task                 |" << endl;
+    cout << "|  2. Undo Recently added Task              |" << endl;
     cout << "|  3. Save Task to the List                 |" << endl;
     cout << "|  4. View All Tasks                        |" << endl;
     cout << "|  5. View Completed Tasks                  |" << endl;
